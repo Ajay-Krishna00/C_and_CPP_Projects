@@ -22,8 +22,8 @@ void main()
 	if (count> ((r*c)/2))
 	{
 		printf("Matrix is sparse\n");
-		ans=((float)count/(r*c));
-		printf("Sparcity is %.2f",ans);
+		ans=((float)count/(r*c))*100;
+		printf("Sparcity is %.2f %",ans);
 	}
 	else
 	{

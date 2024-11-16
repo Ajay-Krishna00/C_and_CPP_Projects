@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.page-template": "vue",
+    "*.layout-template": "vue",
+    "*.vue": "vue",
+    "charconv": "c",
+    "xmemory": "c",
+    "xutility": "c",
+    "stdio.h": "c"
+  }
+}

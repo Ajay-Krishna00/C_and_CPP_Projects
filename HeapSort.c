@@ -1,26 +1,47 @@
 #include<stdio.h>
+void swap(int *arr1,int *arr2)
+{
+  int temp = *arr1;
+  *arr1 = *arr2;
+  *arr2 = temp;
+}
+void heapify(int arr[],int n,int i)
+{
+  int largest=i;
+  int left = 2 * i + 1;
+  int right = 2 * i + 2;
+  if(left<n && arr[left]>arr[largest])
+    largest = left;
+  if(right<n && arr[right]>arr[largest])
+    largest = right;
+  if(largest!=i)
+  {
+    swap(&arr[i], &arr[largest]);
+    heapify(arr, n, largest);
+  }
+}
 void heapSort(int arr[],int n)
 {
   for (int i = n / 2 - 1; i >=0;i--)
     heapify(arr, n, i);
   for (int i = n - 1; i > 0;i--)
     {
-    swap(arr[0], arr[i]);
+    swap(&arr[0], &arr[i]);
     heapify(arr, i, 0);
     }
 }
 void main()
 {
   int n, arr[50];
-  printf("Enter the length of the array ");
+  printf("Enter the length of the array: ");
   scanf("%d", &n);
-  printf("Enter the elements of the array ");
+  printf("Enter the elements of the array\n");
   for (int i = 0; i < n; i++)
   {
     scanf("%d", &arr[i]);
   }
   heapSort(arr, n);
-  printf("the sorted array is: ");
+  printf("The sorted array is: ");
   for (int i = 0; i < n; i++)
   {
     printf("%d ", arr[i]);

@@ -1,16 +1,24 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 // Structure to represent a process
 typedef struct
 {
-  int name;     // Process name (1, 2, 3, ...)
-  int AT;       // Arrival time
-  int BT;       // Burst time
-  int CT;       // Completion time
-  int WT;       // waiting time
-  int TAT;      // turn around time
-
+  int name; // Process name (1, 2, 3, ...)
+  int AT;   // Arrival time
+  int BT;   // Burst time
+  int CT;   // Completion time
+  int WT;   // waiting time
+  int TAT;  // turn around time
+  int processStarted;
+  int remainingBT;
 } Process;
+
+struct Queue
+{
+  Process data;
+  struct Queue *next;
+};
 
 void sortAT(Process processes[], int n)
 {
@@ -32,6 +40,7 @@ void sortAT(Process processes[], int n)
 
 int main()
 {
+  struct Queue *head = NULL;
   int TimeQuantum = 2;
   printf("Time Quantum=%d\n", TimeQuantum);
   // Define the processes
@@ -45,41 +54,113 @@ int main()
   int n = sizeof(processes) / sizeof(Process); // Number of processes
 
   sortAT(processes, n);
+  for (int i = 0; i < n; i++)
+  {
+    processes[i].remainingBT = processes[i].BT;
+    processes[i].processStarted = 0;
+  }
 
   int currenttime = 0;
   int completedProcess = 0;
-  Process temp = processes[0];
 
   while (completedProcess < n)
   {
+    //for newly arrived processes which are not started yet
     for (int i = 0; i < n; i++)
     {
-      if (processes[i].AT <= currenttime && processes[i].CT == 0)
+      if (processes[i].AT <= currenttime && processes[i].processStarted == 0)
       {
-        if (processes[i].priority < temp.priority)
+        struct Queue *newNode = (struct Queue *)malloc(sizeof(struct Queue));
+        newNode->data = processes[i];
+        newNode->next = NULL;
+
+        if (head == NULL)
         {
-          temp = processes[i];
+          head = newNode;
+        }
+        else
+        {
+          struct Queue *ptr = head;
+          while (ptr->next != NULL)
+          {
+            ptr = ptr->next;
+          }
+          ptr->next = newNode;
+        }
+        processes[i].processStarted = 1;
+      }
+    }
+    if (head == NULL)
+    {
+      currenttime++;
+      continue;
+    }
+
+    struct Queue *temp = head;
+    Process currentProcess = temp->data;
+    head = head->next;          // Dequeue
+    free(temp);
+
+    int execution_time = (currentProcess.remainingBT > TimeQuantum) ? TimeQuantum : currentProcess.remainingBT;
+    currenttime += execution_time;
+    currentProcess.remainingBT -= execution_time;    
+    //for newly arrived processes which came while executing the current process
+    for (int i = 0; i < n; i++)
+    {
+      if (processes[i].AT <= currenttime && processes[i].processStarted == 0)
+      {
+        struct Queue *newNode = (struct Queue *)malloc(sizeof(struct Queue));
+        newNode->data = processes[i];
+        newNode->next = NULL;
+
+        if (head == NULL)
+        {
+          head = newNode;
+        }
+        else
+        {
+          struct Queue *ptr = head;
+          while (ptr->next != NULL)
+          {
+            ptr = ptr->next;
+          }
+          ptr->next = newNode;
+        }
+        processes[i].processStarted = 1;
+      }
+    }
+      
+      if (currentProcess.remainingBT > 0)
+      {
+        struct Queue *newNode = (struct Queue *)malloc(sizeof(struct Queue));
+        newNode->data = currentProcess;
+        newNode->next = NULL;
+
+        if (head == NULL)
+        {
+          head = newNode;
+        }
+        else
+        {
+          struct Queue *ptr = head;
+          while (ptr->next != NULL)
+          {
+            ptr = ptr->next;
+          }
+          ptr->next = newNode;
         }
       }
-    }
-    int execution_time = temp.BT;
-
-    currenttime += execution_time;
-    temp.CT = currenttime;
-    temp.TAT = temp.CT - temp.AT;
-    temp.WT = temp.TAT - temp.BT;
-    completedProcess++;
-    for (int i = 0; i < n; i++)
-    {
-      if (processes[i].name == temp.name)
+      else
       {
-        processes[i] = temp;
-        temp.priority = 9999;
-        break;
+        // Process has completed
+        int i = currentProcess.name - 1;
+        processes[i].CT = currenttime;
+        processes[i].TAT = processes[i].CT - processes[i].AT;
+        processes[i].WT = processes[i].TAT - processes[i].BT;
+        completedProcess++;
       }
     }
-  }
-
+  
   float avgWt = 0.0;
   float avgTat = 0.0;
   printf("Process  ArrivalTime BurstTime CompletedTime TurnaroundTime    WaitingTime\n");

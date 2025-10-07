@@ -75,7 +75,7 @@ int main()
   {
     startAddr = atoi(operand); // standard C library function declared in <stdlib.h> that converts a string (array of characters) containing digits into an integer value.
     locCnt = startAddr;
-    fprintf(fp3, "%d\t%s\t%s\t%s", locCnt, label, opcode, operand);
+    fprintf(fp3, "%d\t%s\t%s\t%s\n", locCnt, label, opcode, operand);
     fscanf(fp1, "%s%s%s", label, opcode, operand);
   }
   else

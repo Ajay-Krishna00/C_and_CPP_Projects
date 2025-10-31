@@ -1,129 +1,89 @@
-// Input- assembler.asm
-
-// COPY    START   1000
-// FIRST   LDA     ALPHA
-// **      ADD     ONE
-// **      STA     BETA
-// ALPHA   WORD    5
-// ONE     RESW    1
-// BETA    RESB    10
-// **      BYTE    C'EOF'
-// **      END     FIRST
-
-// Output: Program length = 28
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct symtab
-{
-  char label[20];
-  int addr;
-};
-
-struct optab
-{
-  char opcode[10];
-  int length;
-};
-
-struct symtab SYMTAB[50];
-struct optab OPTAB[] = {{"LDA", 3}, {"STA", 3}, {"LDCH", 3}, {"STCH", 3}, {"ADD", 3}, {"SUB", 3}, {"MUL", 3}, {"DIV", 3}, {"COMP", 3}, {"J", 3}, {"JEQ", 3}, {"JGT", 3}, {"JLT", 3}, {"JSUB", 3}, {"RSUB", 3}};
-
-int syscnt = 0;
-
 int searchOpcode(char code[])
 {
-  for (int i = 0; i < sizeof(OPTAB) / sizeof(OPTAB[0]); i++)
+  char opcode[][10] = {"JSUB", "LDA", "COMP", "JEQ", "ADD", "J", "MUL", "SUB", "STA", "RSUB", "STL"};
+  for (int i = 0; i < 11; i++)
   {
-    if (strcmp(OPTAB[i].opcode, code) == 0)
+    if (strcmp(code, opcode[i]) == 0)
     {
-      return OPTAB[i].length;
+      return 1;
     }
   }
-  return -1;
-}
-
-void insertSymtab(char label[], int addr)
-{
-  strcpy(SYMTAB[syscnt].label, label);
-  SYMTAB[syscnt].addr = addr;
-  syscnt++;
+  return 0;
 }
 
 int main()
 {
-  FILE *fp1, *fp2, *fp3;
+  FILE *f1, *f2, *f3;
+  f1 = fopen("sample.asm", "r");
+  f2 = fopen("SYMTAB.txt", "w");
+  f3 = fopen("intermediate.txt", "w");
 
+  if (!f1 || !f2 || !f3)
+  {
+    printf("Error opening files.\n");
+    exit(1);
+  }
+
+  int locctr, start, len;
   char label[20], opcode[20], operand[20];
-  int startAddr, locCnt, length;
 
-  fp1 = fopen("assembly.asm", "r");
-  fp2 = fopen("symtab.txt", "w");
-  fp3 = fopen("intermediate.txt", "w");
-
-  if (fp1 == NULL || fp2 == NULL || fp3 == NULL)
+  fscanf(f1, "%s %s %s", label, opcode, operand);
+  if (strcmp(opcode, "START") == 0)
   {
-    printf("Error opening file.\n");
-    return 1;
-  }
-
-  fscanf(fp1, "%s%s%s", label, opcode, operand);
-
-  if (strcmp("START", opcode) == 0)
-  {
-    startAddr = atoi(operand); // standard C library function declared in <stdlib.h> that converts a string (array of characters) containing digits into an integer value.
-    locCnt = startAddr;
-    fprintf(fp3, "%d\t%s\t%s\t%s\n", locCnt, label, opcode, operand);
-    fscanf(fp1, "%s%s%s", label, opcode, operand);
-  }
-  else
-  {
-    locCnt = 0;
+    start = strtol(operand, NULL, 16);
+    locctr = start;
+    fprintf(f3, "%X\t%s\t%s\t%s\n", locctr, label, opcode, operand);
+    fscanf(f1, "%s %s %s", label, opcode, operand);
   }
 
   while (strcmp(opcode, "END") != 0)
   {
+    fprintf(f3, "%X\t%s\t%s\t%s\n", locctr, label, opcode, operand);
     if (strcmp(label, "**") != 0)
     {
-      insertSymtab(label, locCnt);
-      fprintf(fp2, "%s\t%d\n", label, locCnt);
+      fprintf(f2, "%s\t%X\n", label, locctr);
     }
-    int len = searchOpcode(opcode);
-    if (len != -1)
+    if (searchOpcode(opcode))
     {
-      locCnt += len;
+      locctr += 3;
     }
     else if (strcmp(opcode, "WORD") == 0)
     {
-      locCnt += 3;
+      locctr += 3;
     }
     else if (strcmp(opcode, "RESW") == 0)
     {
-      locCnt += 3 * atoi(operand);
+      locctr += 3 * atoi(operand);
     }
     else if (strcmp(opcode, "RESB") == 0)
     {
-      locCnt += atoi(operand);
+      locctr += atoi(operand);
     }
     else if (strcmp(opcode, "BYTE") == 0)
     {
-      locCnt += strlen(operand) - 3; // C'EOF' -> 3 chars inside quotes
+      if (operand[0] == 'C')
+      {
+        locctr += (strlen(operand) - 3);
+      }
+      else if (operand[0] == 'X')
+      {
+        locctr += (strlen(operand) - 3) / 2;
+      }
     }
     else
     {
-      printf("Error: Invalid Code %s\n", opcode);
+      printf("Invalid opcode: %s\n", opcode);
     }
-    fprintf(fp3, "%d\t%s\t%s\t%s\n", locCnt, label, opcode, operand);
-    fscanf(fp1, "%s %s %s", label, opcode, operand);
+    fscanf(f1, "%s %s %s", label, opcode, operand);
   }
-  fprintf(fp3, "%d\t%s\t%s\t%s\n", locCnt, label, opcode, operand);
-  length = locCnt - startAddr;
-  printf("Program length = %d\n", length);
-
-  fclose(fp1);
-  fclose(fp2);
-  fclose(fp3);
+  fprintf(f3, "%X\t%s\t%s\t%s\n", locctr, label, opcode, operand);
+  printf("Program length= %X", locctr - start);
+  fclose(f1);
+  fclose(f2);
+  fclose(f3);
   return 0;
 }

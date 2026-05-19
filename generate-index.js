@@ -3,15 +3,19 @@ const path = require("path");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 
-function scan(dir, base = "") {
+function scan(dir) {
     let result = {};
 
     const items = fs.readdirSync(dir);
 
     for (const item of items) {
         const fullPath = path.join(dir, item);
-        const relativePath = path.join(base, item);
-        result[item] = scan(fullPath, relativePath);
+
+        if (fs.statSync(fullPath).isDirectory()) {
+            result[item] = scan(fullPath);
+        } else {
+            result[item] = null;
+        }
     }
 
     return result;

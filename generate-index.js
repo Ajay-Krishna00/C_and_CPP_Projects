@@ -11,12 +11,7 @@ function scan(dir, base = "") {
     for (const item of items) {
         const fullPath = path.join(dir, item);
         const relativePath = path.join(base, item);
-
-        if (fs.statSync(fullPath).isDirectory()) {
-            result[item] = scan(fullPath, relativePath);
-        } else {
-            result[item] = "file";
-        }
+        result[item] = scan(fullPath, relativePath);
     }
 
     return result;

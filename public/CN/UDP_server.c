@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #define PORT 9090
 #define BUFFER_SIZE 1024
@@ -16,11 +17,12 @@ int main() {
     // 1. Create socket
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 
-    // 2. Bind to address
+    //2.define server addr
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
-
+    
+    // 3. Bind to address
     bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
     printf("UDP Server listening on port %d...\n", PORT);
 

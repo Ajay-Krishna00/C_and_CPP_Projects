@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
 
 #define PORT 3000
 
@@ -37,7 +38,7 @@ void main()
 
     if (recv(server, &ack, sizeof(ack), 0) < 0)
     {
-      printf("Timeout! Resending frame");
+      printf("Timeout! Resending frame\n");
       continue;
     }
 

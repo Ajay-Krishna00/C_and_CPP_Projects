@@ -9,6 +9,22 @@ This repository showcases various projects, exercises, and experiments I've work
 - Explore the folders and files to find something interesting!
 - Compile and run the projects using a C or C++ compiler (e.g., gcc or clang++)
 
+## API
+
+This repo is deployed on Vercel and exposes a `/ask` endpoint that forwards to Gemini.
+
+### Setup
+
+- Add a `GEMINI_API_KEY` environment variable in Vercel.
+
+### Example
+
+```bash
+curl -X POST "https://c-and-cpp-projects.vercel.app/ask" \
+	-H "Content-Type: application/json" \
+	-d "{\"code\":\"int main(){return 0;}\",\"question\":\"What does this do?\"}"
+```
+
 ## Contributing
 
 - Feel free to submit pull requests with new projects, exercises, or examples!

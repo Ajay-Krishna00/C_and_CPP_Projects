@@ -1,265 +1,244 @@
+# curl Command Breakdown
+
 Your command:
 
+```bash
 curl -X POST "https://c-and-cpp-projects.vercel.app/ask" \
   -H "Content-Type: application/json" \
   -d '{"code":"int main(){return 0;}","question":"What does this do?"}'
+```
 
-is a command-line way of saying:
+Is a command-line way of saying:
 
-“Send an HTTP POST request with JSON data to this API endpoint.”
+"Send an HTTP POST request with JSON data to this API endpoint."
 
-Let’s break down EVERY piece.
+Let's break down every piece.
 
-What is curl?
+## What is curl?
 
-curl is a command-line HTTP client.
+`curl` is a command-line HTTP client. It can:
 
-It can:
+- Send requests
+- Upload files
+- Call APIs
+- Download webpages
+- Test backend endpoints
 
-send requests
-upload files
-call APIs
-download webpages
-test backend endpoints
+Think of it as a terminal-based browser/API tester, except it shows raw responses instead of rendering webpages.
 
-Think of it as:
+## Structure of your command
 
-Terminal-based browser/API tester
-
-except it shows raw responses instead of rendering webpages.
-
-Structure of your command
+```text
 curl
   -X POST
   URL
   -H "header"
   -d "data"
-1. curl
+```
 
-Starts the curl program.
+## 1. `curl`
+
+Starts the `curl` program.
 
 Without arguments:
 
+```bash
 curl https://google.com
+```
 
-it performs a simple GET request.
+It performs a simple GET request, equivalent to opening a webpage.
 
-Equivalent to opening webpage.
+## 2. `-X POST`
 
-2. -X POST
+Sets the HTTP method.
 
-This sets the HTTP method.
+### What is `-X`?
 
-What is -X?
-
--X means:
-
-Use this HTTP request method
+`-X` means: use this HTTP request method.
 
 Syntax:
 
+```text
 -X METHOD
+```
 
 Examples:
 
+```text
 -X GET
 -X POST
 -X PUT
 -X DELETE
-Your case
+```
+
+Your case:
+
+```text
 -X POST
+```
 
-means:
+Means "send a POST request" instead of the default GET.
 
-"Send a POST request"
+### Common HTTP methods
 
-instead of default GET.
+| Method | Meaning |
+| --- | --- |
+| GET | Retrieve data |
+| POST | Send/create data |
+| PUT | Replace/update |
+| PATCH | Partial update |
+| DELETE | Remove data |
+| OPTIONS | Ask allowed operations |
 
-Why needed?
+Example:
 
-Because different HTTP methods mean different intentions.
-
-Common HTTP methods
-Method	Meaning
-GET	Retrieve data
-POST	Send/create data
-PUT	Replace/update
-PATCH	Partial update
-DELETE	Remove data
-OPTIONS	Ask allowed operations
-Example
-GET
+```bash
 curl https://api.com/users
+```
 
-means:
+Means: "Give me users."
 
-"Give me users"
-POST
+```bash
 curl -X POST ...
+```
 
-means:
+Means: "I'm sending data to you."
 
-"I'm sending data to you"
-Important detail
+### Important detail
 
-When you use:
+When you use `-d`, `curl` often automatically switches to POST anyway. So these are usually equivalent:
 
--d
-
-curl often automatically switches to POST anyway.
-
-So these are usually equivalent:
-
+```bash
 curl -d '{"x":1}' URL
-
-and
-
 curl -X POST -d '{"x":1}' URL
+```
 
-But explicitly using -X POST makes intent clearer.
+Using `-X POST` just makes intent clearer.
 
-3. The URL
-"https://c-and-cpp-projects.vercel.app/ask"
+## 3. The URL
 
-This tells curl WHERE to send request.
+```text
+https://c-and-cpp-projects.vercel.app/ask
+```
 
-URL breakdown
-https://
+This tells `curl` where to send the request.
 
-Protocol.
+URL breakdown:
 
-Uses HTTPS encryption.
+- `https://` = protocol (HTTPS encryption)
+- `c-and-cpp-projects.vercel.app` = domain/server
+- `/ask` = path/endpoint
 
-c-and-cpp-projects.vercel.app
+## 4. `-H`
 
-Domain/server.
-
-/ask
-
-Path/endpoint.
-
-Specific API route.
-
-4. -H
+```text
 -H "Content-Type: application/json"
+```
 
 Adds HTTP headers.
 
-What are headers?
+Headers are metadata about the request, like labels attached to a package.
 
-Metadata about request.
+Syntax:
 
-Like labels attached to package.
-
-Syntax
+```text
 -H "Header-Name: value"
-Your header
+```
+
+Your header:
+
+```text
 Content-Type: application/json
+```
 
-means:
+Means: "The request body contains JSON."
 
-"The request body contains JSON."
+Without this header, the server may not parse the body correctly.
 
-Very important.
+## 5. `-d`
 
-Without this header:
-
-server may not parse body correctly
-Example analogy
-
-Imagine mailing a box.
-
-Header is like sticker saying:
-
-Contains fragile glass
-
-The actual body is the contents.
-
-5. -d
+```text
 -d '{"code":"int main(){return 0;}","question":"What does this do?"}'
+```
 
-This sends request body data.
+Sends request body data.
 
-What does -d mean?
+`-d` means data. It tells `curl`: "Include this data in the request body."
 
--d = data
+Your data:
 
-It tells curl:
-
-"Include this data in request body."
-Your data
+```json
 {
-  "code":"int main(){return 0;}",
-  "question":"What does this do?"
+  "code": "int main(){return 0;}",
+  "question": "What does this do?"
 }
+```
 
 This becomes the HTTP body.
 
-Final HTTP request generated
+## Final HTTP request generated
 
 Your curl command roughly becomes:
 
+```http
 POST /ask HTTP/1.1
 Host: c-and-cpp-projects.vercel.app
 Content-Type: application/json
 Content-Length: 74
 
 {"code":"int main(){return 0;}","question":"What does this do?"}
-What each part becomes
-curl part	HTTP equivalent
--X POST	POST /ask HTTP/1.1
--H "Content-Type: application/json"	HTTP header
--d '{...}'	Request body
-URL	destination server
-Why backslash \ used?
-\
+```
 
-Means:
+### What each part becomes
 
-"Continue command on next line"
+| curl part | HTTP equivalent |
+| --- | --- |
+| `-X POST` | `POST /ask HTTP/1.1` |
+| `-H "Content-Type: application/json"` | HTTP header |
+| `-d '{...}'` | Request body |
+| URL | Destination server |
 
-Without it, shell thinks command ended.
+## Why is the backslash `\` used?
 
-So these are same
-Multiline
+`\` means: "Continue command on the next line."
+
+So these are the same:
+
+**Multiline**
+
+```bash
 curl \
   -X POST \
   URL
-Single line
+```
+
+**Single line**
+
+```bash
 curl -X POST URL
-What happens if you omit things?
-No -X POST
-curl URL
+```
 
-Defaults to GET.
+## What happens if you omit things?
 
-No -H
+- No `-X POST`: defaults to GET.
+- No `-H`: server may not know the body is JSON and could fail parsing.
+- No `-d`: request has no body, and your backend returns:
 
-Server may not know body is JSON.
-
-Could fail parsing.
-
-No -d
-
-Then request has no body.
-
-Your backend would return:
-
+```json
 {
   "error": "Both 'code' and 'question' are required."
 }
-Important Concept
+```
 
-curl is NOT special.
+## Important concept
 
-It simply creates raw HTTP requests.
+`curl` is not special. It simply creates raw HTTP requests.
 
-Frontend JavaScript fetch() does fundamentally same thing.
+Frontend JavaScript `fetch()` does the same thing underneath.
 
-fetch equivalent
+### fetch equivalent
 
-Your curl command is basically equivalent to:
-
+```js
 fetch("https://c-and-cpp-projects.vercel.app/ask", {
   method: "POST",
   headers: {
@@ -270,20 +249,14 @@ fetch("https://c-and-cpp-projects.vercel.app/ask", {
     question: "What does this do?"
   })
 });
+```
 
-Same HTTP request underneath.
+## Visual mental model
 
-Visual Mental Model
-curl command
-    │
-    ▼
-curl builds HTTP request
-    │
-    ▼
-POST + headers + body
-    │
-    ▼
-internet
-    │
-    ▼
-server receives request
+```mermaid
+flowchart TD
+  A[curl command] --> B[curl builds HTTP request]
+  B --> C[POST + headers + body]
+  C --> D[Internet]
+  D --> E[Server receives request]
+```

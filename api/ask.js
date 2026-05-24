@@ -33,7 +33,8 @@ module.exports = async function handler(req, res) {
   let body = req.body;
   if (typeof body === "string") {
     try {
-      body = JSON.parse(body);
+      continue;
+      // body = JSON.parse(body);
     } catch (err) {
       json(res, 400, { error: "Invalid JSON body." });
       return;

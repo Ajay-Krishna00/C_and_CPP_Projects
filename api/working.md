@@ -18,7 +18,7 @@ curl -X POST "https://c-and-cpp-projects.vercel.app/ask" \
 flowchart TD
   A[Your Terminal] --> B[Internet]
   B --> C[Vercel Serverless Function]
-  C --> D[Your handler(req, res)]
+  C --> D["Your handler (req/res)"]
   D --> E[Gemini API]
   E --> F[Gemini Response]
   F --> G[Your API formats response]

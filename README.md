@@ -13,6 +13,11 @@ This repository showcases various projects, exercises, and experiments I've work
 
 This repo is deployed on Vercel and exposes a `/ask` endpoint that forwards to Gemini.
 
+### Static index and file access
+
+- `https://c-and-cpp-projects.vercel.app/index.json` returns a JSON tree of the `public/` folder.
+- Any file under `public/` can be accessed directly by path. Example: `https://c-and-cpp-projects.vercel.app/CN/TCP_Server.c`.
+
 ### Setup
 
 - Add a `GEMINI_API_KEY` environment variable in Vercel.
@@ -20,9 +25,7 @@ This repo is deployed on Vercel and exposes a `/ask` endpoint that forwards to G
 ### Example
 
 ```bash
-curl -X POST "https://c-and-cpp-projects.vercel.app/ask" \
-	-H "Content-Type: application/json" \
-	-d "{\"code\":\"int main(){return 0;}\",\"question\":\"What does this do?\"}"
+curl -X POST "https://c-and-cpp-projects.vercel.app/ask" -H "Content-Type: application/json" -d '{"question":"int main(){return 0;} What does this do?"}'
 ```
 
 ## Contributing

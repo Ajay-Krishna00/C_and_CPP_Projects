@@ -40,26 +40,22 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  const code = (body && body.code) || "";
-  const question = (body && body.question) || "";
+  const question = (body) || "";
   const model = (body && body.model) || DEFAULT_MODEL;
 
-  if (!code.trim() || !question.trim()) {
-    json(res, 400, { error: "Both 'code' and 'question' are required." });
+  if (!question.trim()) {
+    json(res, 400, { error: "The 'question' field is required." });
     return;
   }
 
-  if (code.length > MAX_CODE_CHARS) {
-    json(res, 413, { error: "Code is too large. Please send a smaller snippet." });
+  if (question.length > MAX_CODE_CHARS) {
+    json(res, 413, { error: "Question is too large. Please send a smaller question." });
     return;
   }
 
   const prompt = [
     "You are a helpful programming assistant.",
     "Answer the question about the code. Be concise and precise.",
-    "",
-    "Code:",
-    code,
     "",
     "Question:",
     question
@@ -73,7 +69,7 @@ module.exports = async function handler(req, res) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 1024 }
+        generationConfig: { temperature: 0.2, maxOutputTokens: 10024 }
       })
     });
 
@@ -90,7 +86,7 @@ module.exports = async function handler(req, res) {
       .join("")
       .trim();
 
-    json(res, 200, { answer: text, model });
+    json(res, 200, { answer: text });
   } catch (err) {
     json(res, 500, { error: "Failed to call Gemini API." });
   }

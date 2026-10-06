@@ -2,6 +2,7 @@
   "name": "c-and-cpp-projects",
   "version": "1.0.0",
   "scripts": {
-    "build": "node generate-index.js"
+    "build": "node generate-index.js",
+    "ask": "node ask.js"
   }
 }

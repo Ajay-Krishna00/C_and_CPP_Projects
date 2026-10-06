@@ -10,8 +10,8 @@ function json(res, statusCode, payload) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
 
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -19,8 +19,8 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (req.method !== "POST") {
-    json(res, 405, { error: "Method Not Allowed. Use POST." });
+  if (req.method !== "GET" && req.method !== "POST") {
+    json(res, 405, { error: "Method Not Allowed. Use GET or POST." });
     return;
   }
 
@@ -30,22 +30,52 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  let body = req.body;
-  if (typeof body === "string") {
-    try {
-      body= req.body;
-      // body = JSON.parse(body);
-    } catch (err) {
-      json(res, 400, { error: "Invalid JSON body." });
-      return;
+  let question = "";
+  let model = DEFAULT_MODEL;
+
+  // 1. Support GET query params (e.g. /ask?q=What+is+Lex)
+  if (req.method === "GET") {
+    const q = (req.query && (req.query.q || req.query.question)) || "";
+    question = typeof q === "string" ? q : "";
+    if (req.query && req.query.model) {
+      model = req.query.model;
     }
   }
 
-  const question = (body) || "";
-  const model = (body && body.model) || DEFAULT_MODEL;
+  // 2. Support POST body (JSON object, plain text string, or urlencoded)
+  if (req.method === "POST") {
+    let body = req.body;
 
-  if (!question.trim()) {
-    json(res, 400, { error: "The 'question' field is required." });
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (err) {
+        // Keep as raw string
+      }
+    }
+
+    if (typeof body === "string") {
+      question = body;
+    } else if (body && typeof body === "object") {
+      if (body.code && body.question) {
+        question = `Code:\n${body.code}\n\nQuestion:\n${body.question}`;
+      } else if (body.question) {
+        question = body.question;
+      } else if (body.code) {
+        question = body.code;
+      } else {
+        // If curl -d "simple text" without '=' sent, body keys might contain the text
+        const keys = Object.keys(body);
+        if (keys.length === 1 && body[keys[0]] === "") {
+          question = keys[0];
+        }
+      }
+      if (body.model) model = body.model;
+    }
+  }
+
+  if (!question || !question.trim()) {
+    json(res, 400, { error: "The 'question' (or 'q') is required." });
     return;
   }
 
@@ -87,7 +117,18 @@ module.exports = async function handler(req, res) {
       .join("")
       .trim();
 
-    json(res, 200, { answer: text });
+    // Check if client explicitly wants JSON
+    const wantsJson = (req.query && req.query.format === "json") ||
+                      (req.headers["accept"] && req.headers["accept"].includes("application/json") && !req.headers["user-agent"]?.includes("curl"));
+
+    if (wantsJson) {
+      json(res, 200, { answer: text });
+    } else {
+      // By default for curl and general requests, return clean Markdown directly
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+      res.end(text + "\n");
+    }
   } catch (err) {
     json(res, 500, { error: "Failed to call Gemini API." });
   }

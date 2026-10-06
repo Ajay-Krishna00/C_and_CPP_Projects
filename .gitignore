@@ -1,4 +1,5 @@
 *.exe
+*.gch
 .vscode/
 trial.c++
 TRIAL.C

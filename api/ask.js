@@ -57,10 +57,10 @@ module.exports = async function handler(req, res) {
     if (typeof body === "string") {
       question = body;
     } else if (body && typeof body === "object") {
-      if (body.code && body.question) {
-        question = `Code:\n${body.code}\n\nQuestion:\n${body.question}`;
-      } else if (body.question) {
-        question = body.question;
+      if (body.code && (body.question || body.q)) {
+        question = `Code:\n${body.code}\n\nQuestion:\n${body.question || body.q}`;
+      } else if (body.question || body.q) {
+        question = body.question || body.q;
       } else if (body.code) {
         question = body.code;
       } else {

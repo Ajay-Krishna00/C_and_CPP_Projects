@@ -32,44 +32,49 @@ This repository is deployed on Vercel:
 
 The backend provides a serverless `/ask` endpoint powered by Gemini to ask programming and concept questions from any system or terminal.
 
-### Quick Usage (Simple GET Request)
+### Quick Usage (GET with auto URL encoding)
 
-From **any computer or terminal**, you can query Gemini without needing local files, JSON formatting, or `-X POST` headers:
+On modern Linux/macOS, literal spaces in URLs cause `curl (3) URL rejected`. Use `-G --data-urlencode` so `curl` safely encodes spaces:
 
 ```bash
-curl "https://c-and-cpp-projects.vercel.app/ask?q=What is an epsilon closure in NFA"
+curl -G "https://c-and-cpp-projects.vercel.app/ask" --data-urlencode "q=What is an epsilon closure in NFA"
 ```
 
 ### Save Directly to a Markdown File (`-o`)
 
-To save Gemini's answer directly to a file without displaying it in the terminal:
+To save Gemini's answer directly to a file:
 
 ```bash
-curl "https://c-and-cpp-projects.vercel.app/ask?q=Explain Lex and Yacc workflow" -o answer.md
+curl -G "https://c-and-cpp-projects.vercel.app/ask" --data-urlencode "q=Explain Lex and Yacc workflow" -o answer.md
+```
+
+Or via simple POST (no URL encoding needed):
+```bash
+curl -d "q=Explain Lex and Yacc workflow" https://c-and-cpp-projects.vercel.app/ask -o answer.md
 ```
 *(The endpoint directly returns clean Markdown text, so `answer.md` will contain formatted markdown ready to read without raw JSON envelopes).*
 
-### Optional: 1-Word Command Shortcut
+### 1-Word Command Shortcut (Recommended for your terminal)
 
-You can make it a simple 1-word command on any machine:
+Add this function to your shell to ask questions without typing the URL or flags:
 
 **On Linux / macOS / WSL (add to `~/.bashrc` or `~/.zshrc`):**
 ```bash
 ask() {
-  curl -s "https://c-and-cpp-projects.vercel.app/ask?q=$*" -o answer.md
-  echo "Saved answer to answer.md"
+  curl -s -G "https://c-and-cpp-projects.vercel.app/ask" --data-urlencode "q=$*" -o answer.md
+  echo "Answer saved to answer.md"
 }
 ```
 *Usage:*
 ```bash
-ask What is DFA minimization
+ask give me the c code to convert epsilon nfa to nfa
 ```
 
 **On Windows PowerShell (add to your `$PROFILE`):**
 ```powershell
 function ask($q) {
-  curl.exe -s "https://c-and-cpp-projects.vercel.app/ask?q=$q" -o answer.md
-  Write-Host "Saved answer to answer.md"
+  curl.exe -s -G "https://c-and-cpp-projects.vercel.app/ask" --data-urlencode "q=$q" -o answer.md
+  Write-Host "Answer saved to answer.md"
 }
 ```
 *Usage:*

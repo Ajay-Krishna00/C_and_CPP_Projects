@@ -2,6 +2,8 @@
 
 This directory contains implementations for all 4 Cycles of the Compiler Design laboratory curriculum.
 
+> 📖 **Viva Preparation**: Check out the comprehensive **[CD Lab Viva Questions & Reference Guide](./CD_Lab_Viva_Questions.md)** covering core compiler theory, experiment-wise Q&A, library functions, and execution commands.
+
 ## Table of Contents
 
 ### Cycle I: Automata & Lexical Analysis (in C)
